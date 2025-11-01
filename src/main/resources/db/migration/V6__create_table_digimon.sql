@@ -1,6 +1,6 @@
 CREATE TABLE digimon (
-    id SERIAL PRIMARY KEY,
-    jogador_id INT NOT NULL REFERENCES jogador(id) ON DELETE CASCADE,
+    id BIGSERIAL PRIMARY KEY,
+    jogador_id BIGINT NOT NULL REFERENCES jogador(id) ON DELETE CASCADE,
     nome VARCHAR(60) NOT NULL,
     especie VARCHAR(60) NOT NULL,
     nivel INT DEFAULT 1,

@@ -1,7 +1,7 @@
 package br.com.digimon.core.usuario.domain;
 
 import br.com.digimon.core.jogador.domain.Jogador;
-import br.com.digimon.core.usuario.UsuarioRole;
+import br.com.digimon.core.usuario.enumerator.UsuarioRole;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,10 +29,12 @@ public class Usuario {
     @Column(nullable = false)
     private String password;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UsuarioRole role = UsuarioRole.PLAYER;
 
+    @Builder.Default
     @Column(name = "criado_em", nullable = false)
     private LocalDateTime criadoEm = LocalDateTime.now();
 

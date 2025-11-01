@@ -1,4 +1,4 @@
-package br.com.digimon.core.usuario;
+package br.com.digimon.core.usuario.enumerator;
 
 public enum UsuarioRole {
     ADMIN,
