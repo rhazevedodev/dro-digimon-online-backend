@@ -1,0 +1,2 @@
+ALTER TABLE jogador
+ADD COLUMN primeiro_acesso BOOLEAN DEFAULT FALSE;

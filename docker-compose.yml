@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: meu_postgres_digimon
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: banco_digimonOnline
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d banco_digimonOnline"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: meu_app_digimon
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://meu_postgres_digimon:5432/banco_digimonOnline
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:
