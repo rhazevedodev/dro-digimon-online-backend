@@ -1,6 +1,10 @@
 package br.com.digimon.core.digitama.service;
 
 import br.com.digimon.core.digimon.domain.Digimon;
+import br.com.digimon.core.digimon.domain.DigimonSpecies;
+import br.com.digimon.core.digimon.enumerator.DigimonPersonality;
+import br.com.digimon.core.digimon.repository.DigimonRepository;
+import br.com.digimon.core.digimon.service.DigimonSpeciesService;
 import br.com.digimon.core.digitama.config.DigitamaProperties;
 import br.com.digimon.core.digitama.domain.Digitama;
 import br.com.digimon.core.digitama.dto.ChocarDigitamaRequestDTO;
@@ -20,8 +24,10 @@ import java.util.stream.Collectors;
 public class DigitamaService {
 
     private final DigitamaProperties properties;
-    private final JogadorRepository jogadorRepository;
     private final EstadoJogoService estadoJogoService;
+    private final DigimonSpeciesService digimonSpeciesService;
+    private final JogadorRepository jogadorRepository;
+    private final DigimonRepository digimonRepository;
 
     public List<Digitama> listarDigitamas() {
         return properties.getList().stream()
@@ -55,16 +61,31 @@ public class DigitamaService {
         // Sorteia um Digimon possível
         var possiveis = digitama.getPossiveis();
         var sorteado = possiveis.get(new Random().nextInt(possiveis.size()));
+        DigimonSpecies especie = digimonSpeciesService.findByName(sorteado);
 
         // Cria novo Digimon
-//        Digimon novo = new Digimon();
-//        novo.setNome(sorteado);
-//        novo.setLevel(1);
-//        novo.setTipo("Baby I");
-//        novo.setJogador(jogador);
-//        novo.setAtivo(true);
-//        novo.setImagem(buscarImagemPorNome(sorteado)); // opcional, se quiser associar imagem automática
-//        digimonRepository.save(novo);
+        Digimon novo = new Digimon();
+        novo.setNome(sorteado);
+        novo.setNivel(1);
+        novo.setEstagio(especie.getEstagio());
+        novo.setJogador(jogador);
+        novo.setSpecies(especie);
+
+        // Atributos iniciais herdados da espécie
+        novo.setHp(especie.getBaseHp());
+        novo.setAtk(especie.getBaseAtk());
+        novo.setDef(especie.getBaseDef());
+        novo.setInt_(especie.getBaseInt());
+        novo.setSpd(especie.getBaseSpd());
+        novo.setEnergia(50); // pode ser fixo para começar
+
+        // 🔹 Gera IVs aleatórios
+        novo.gerarIVs();
+
+        // 🔹 Define personalidade
+        novo.setPersonality(DigimonPersonality.values()[new Random().nextInt(DigimonPersonality.values().length)]);
+
+        digimonRepository.save(novo);
 
         // 🔹 Atualiza o primeiro acesso
         if (!jogador.isPrimeiroAcesso()) {
@@ -75,11 +96,21 @@ public class DigitamaService {
         estadoJogoService.marcarDigitamaChocada(jogador);
 
         return ChocarDigitamaResponseDTO.builder()
-                .digimonId(Long.valueOf("1"))
+                .digimonId(especie.getId())
                 .nome(sorteado)
                 .imagem(buscarImagemPorNome(sorteado))
-                .tipo("novo.getTipo()")
+                .tipo(especie.getTipo().toString())
                 .level(1)
+                .elemento(especie.getElemento().toString())
+                .personalidade(novo.getPersonality().toString())
+                .ivs(new java.util.HashMap<>() {{
+                    put("hp", novo.getIvHp());
+                    put("atk", novo.getIvAtk());
+                    put("def", novo.getIvDef());
+                    put("int", novo.getIvInt());
+                    put("spd", novo.getIvSpd());
+                    put("total", novo.getIvTotal());
+                }})
                 .build();
     }
 

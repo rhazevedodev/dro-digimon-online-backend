@@ -1,0 +1,2 @@
+ALTER TABLE digimon
+    ADD COLUMN iv_total DECIMAL(5,2) DEFAULT 0.00;

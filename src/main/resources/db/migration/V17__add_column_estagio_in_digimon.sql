@@ -1,0 +1,2 @@
+ALTER TABLE digimon
+    ADD COLUMN estagio VARCHAR(20) NOT NULL UNIQUE;

@@ -15,3 +15,30 @@ spring:
 jwt:
   secret: 1234567890abcdefghijklmnopqrstuv987654321
   expiration: 86400000 # 24h
+
+digitamas:
+  list:
+    - id: 1
+      nome: "Digitama Verde"
+      imagem: "../images/digimons/digitamas/digitama1.jpg"
+      possiveis: ["Botamon", "Punimon"]
+    - id: 2
+      nome: "Digitama Azul"
+      imagem: "../images/digimons/digitamas/digitama2.jpeg"
+      possiveis: ["Yuramon", "Poyomon"]
+    - id: 3
+      nome: "Digitama Vermelha"
+      imagem: "../images/digimons/digitamas/digitama3.jpeg"
+      possiveis: ["Pabumon", "Poyomon"]
+    - id: 4
+      nome: "Digitama Roxa"
+      imagem: "../images/digimons/digitamas/digitama4.jpeg"
+      possiveis: ["Poyomon", "Yuramon"]
+    - id: 5
+      nome: "Digitama Cinza"
+      imagem: "../images/digimons/digitamas/digitama5.jpeg"
+      possiveis: ["Poyomon", "Yuramon"]
+    - id: 6
+      nome: "Digitama Arco-íris"
+      imagem: "../images/digimons/digitamas/digitama6.jpg"
+      possiveis: ["Botamon", "Punimon", "Yuramon", "Pabumon", "Pichimon", "Poyomon"]

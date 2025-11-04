@@ -1,0 +1,2 @@
+ALTER TABLE digimon_species
+    ALTER COLUMN id TYPE BIGINT;
