@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.digimon.core.item.domain.Item;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -20,8 +21,9 @@ public class Expedicao {
     private String descricao;
     private boolean desbloqueadaPadrao = false;
 
-    @OneToMany(mappedBy = "expedicao", cascade = CascadeType.ALL)
-    private List<ExpedicaoDificuldade> dificuldades = new ArrayList<>();
+    @OneToMany(mappedBy = "expedicao", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference("expedicao-dificuldades")
+    private List<ExpedicaoDificuldade> dificuldades;
 
     @ManyToOne
     @JoinColumn(name = "item_requerido_id")

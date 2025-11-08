@@ -1,8 +1,13 @@
 package br.com.digimon.core.expedicao.domain;
 
 import br.com.digimon.core.expedicao.enumerator.DificuldadeExpedicao;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "expedicao_dificuldade")
@@ -15,6 +20,7 @@ public class ExpedicaoDificuldade {
 
     @ManyToOne
     @JoinColumn(name = "expedicao_id")
+    @JsonBackReference("expedicao-dificuldades")
     private Expedicao expedicao;
 
     @Enumerated(EnumType.STRING)
@@ -22,5 +28,8 @@ public class ExpedicaoDificuldade {
 
     private int poderMinimo;
     private int duracaoHoras;
-    private String recompensas; // JSON string ou mapeado em tabela própria
+
+    @OneToMany(mappedBy = "dificuldade", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference("dificuldade-recompensas")
+    private List<ExpedicaoItemRecompensa> recompensas;
 }

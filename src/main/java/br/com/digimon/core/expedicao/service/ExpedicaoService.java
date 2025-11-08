@@ -1,10 +1,13 @@
 package br.com.digimon.core.expedicao.service;
 
+import br.com.digimon.core.digimon.domain.Digimon;
 import br.com.digimon.core.digimon.repository.DigimonRepository;
 import br.com.digimon.core.expedicao.domain.Expedicao;
 import br.com.digimon.core.expedicao.domain.ExpedicaoAtiva;
 import br.com.digimon.core.expedicao.domain.ExpedicaoDificuldade;
+import br.com.digimon.core.expedicao.dto.ExpedicaoDTO;
 import br.com.digimon.core.expedicao.enumerator.DificuldadeExpedicao;
+import br.com.digimon.core.expedicao.mapper.ExpedicaoMapper;
 import br.com.digimon.core.expedicao.repo.ExpedicaoAtivaRepository;
 import br.com.digimon.core.expedicao.repo.ExpedicaoRepository;
 import br.com.digimon.core.item.domain.Item;
@@ -23,26 +26,44 @@ public class ExpedicaoService {
 
     private final ExpedicaoRepository expedicaoRepo;
     private final ExpedicaoAtivaRepository ativaRepo;
-    private final JogadorRepository jogadorRepo;
-    private final DigimonRepository digimonRepo;
+    private final JogadorRepository jogadorRepository;
+    private final DigimonRepository digimonRepository;
 
-    public List<Expedicao> listarExpedicoesDisponiveis(Long jogadorId) {
-        Jogador jogador = jogadorRepo.findById(jogadorId)
+    public List<ExpedicaoDTO> listarExpedicoesDisponiveis(Long jogadorId) {
+        var jogador = jogadorRepository.findById(jogadorId)
                 .orElseThrow(() -> new RuntimeException("Jogador não encontrado"));
 
-        return expedicaoRepo.findAll().stream()
+        var expedicoes = expedicaoRepo.findAll().stream()
                 .filter(exp -> exp.isDesbloqueadaPadrao() || jogadorPossuiItem(jogador, exp.getItemRequerido()))
+                .map(ExpedicaoMapper::toDTO)
                 .toList();
+
+        if (expedicoes.isEmpty())
+            throw new RuntimeException("Nenhuma expedição disponível para o jogador");
+
+        return expedicoes;
     }
 
-    public ExpedicaoAtiva iniciarExpedicao(Long jogadorId, Long expedicaoId, DificuldadeExpedicao dificuldade) {
-        Jogador jogador = jogadorRepo.findById(jogadorId)
-                .orElseThrow(() -> new RuntimeException("Jogador não encontrado"));
+    public ExpedicaoAtiva iniciarExpedicao(Long digimonId, Long expedicaoId, DificuldadeExpedicao dificuldade) {
+        // Busca o Digimon enviado
+        Digimon digimon = digimonRepository.findById(digimonId)
+                .orElseThrow(() -> new RuntimeException("Digimon não encontrado"));
+
+        // O jogador é derivado do Digimon
+        Jogador jogador = digimon.getJogador();
+
+        if (jogador == null) {
+            throw new RuntimeException("O Digimon não está vinculado a nenhum jogador");
+        }
+
+        // Busca a expedição
         Expedicao exp = expedicaoRepo.findById(expedicaoId)
                 .orElseThrow(() -> new RuntimeException("Expedição não encontrada"));
 
+        // Cria a expedição ativa
         ExpedicaoAtiva ativa = new ExpedicaoAtiva();
         ativa.setJogador(jogador);
+        ativa.setDigimonEnviado(digimon);
         ativa.setExpedicao(exp);
         ativa.setDificuldade(dificuldade);
         ativa.setInicio(Instant.now());
@@ -62,7 +83,7 @@ public class ExpedicaoService {
 
         Jogador jogador = ativa.getJogador();
 //        jogador.adicionarItem(ativa.getExpedicao().getItemRecompensa());
-        jogadorRepo.save(jogador);
+        jogadorRepository.save(jogador);
 
         return true;
     }

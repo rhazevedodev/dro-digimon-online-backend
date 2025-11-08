@@ -9,4 +9,6 @@ public class DigimonResumoDTO {
     private Long id;
     private String nome;
     private boolean ativo;
+    private String estagio;
+    private int nivel;
 }
