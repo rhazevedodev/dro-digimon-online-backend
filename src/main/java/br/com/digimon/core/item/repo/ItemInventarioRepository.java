@@ -9,4 +9,6 @@ import java.util.Optional;
 
 public interface ItemInventarioRepository extends JpaRepository<ItemInventario, Long> {
     Optional<ItemInventario> findByDigimonAndItem(Digimon digimon, Item item);
+
+    Optional<ItemInventario> findByDigimonIdAndItemId(Long digimonId, Long itemConsumivelId);
 }
