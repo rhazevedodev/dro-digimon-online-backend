@@ -7,8 +7,7 @@ import java.time.Instant;
 import java.util.List;
 
 public interface ExpedicaoAtivaRepository extends JpaRepository<ExpedicaoAtiva, Long> {
-    List<ExpedicaoAtiva> findByJogadorId(Long jogadorId);
-    List<ExpedicaoAtiva> findByJogadorIdAndFimAfter(Long jogadorId, Instant agora);
+    List<ExpedicaoAtiva> findByDigimonIdAndFimAfter(Long digimonId, Instant agora);
 
 }
 

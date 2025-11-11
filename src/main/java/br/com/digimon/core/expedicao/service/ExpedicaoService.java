@@ -11,6 +11,8 @@ import br.com.digimon.core.expedicao.mapper.ExpedicaoMapper;
 import br.com.digimon.core.expedicao.repo.ExpedicaoAtivaRepository;
 import br.com.digimon.core.expedicao.repo.ExpedicaoRepository;
 import br.com.digimon.core.item.domain.Item;
+import br.com.digimon.core.item.domain.ItemInventario;
+import br.com.digimon.core.item.repo.ItemInventarioRepository;
 import br.com.digimon.core.jogador.domain.Jogador;
 import br.com.digimon.core.jogador.repo.JogadorRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class ExpedicaoService {
     private final ExpedicaoAtivaRepository ativaRepo;
     private final JogadorRepository jogadorRepository;
     private final DigimonRepository digimonRepository;
+    private final ItemInventarioRepository itemInventarioRepository;
 
     public List<ExpedicaoDTO> listarExpedicoesDisponiveis(Long jogadorId) {
         var jogador = jogadorRepository.findById(jogadorId)
@@ -45,25 +48,14 @@ public class ExpedicaoService {
     }
 
     public ExpedicaoAtiva iniciarExpedicao(Long digimonId, Long expedicaoId, DificuldadeExpedicao dificuldade) {
-        // Busca o Digimon enviado
         Digimon digimon = digimonRepository.findById(digimonId)
                 .orElseThrow(() -> new RuntimeException("Digimon não encontrado"));
 
-        // O jogador é derivado do Digimon
-        Jogador jogador = digimon.getJogador();
-
-        if (jogador == null) {
-            throw new RuntimeException("O Digimon não está vinculado a nenhum jogador");
-        }
-
-        // Busca a expedição
         Expedicao exp = expedicaoRepo.findById(expedicaoId)
                 .orElseThrow(() -> new RuntimeException("Expedição não encontrada"));
 
-        // Cria a expedição ativa
         ExpedicaoAtiva ativa = new ExpedicaoAtiva();
-        ativa.setJogador(jogador);
-        ativa.setDigimonEnviado(digimon);
+        ativa.setDigimon(digimon);
         ativa.setExpedicao(exp);
         ativa.setDificuldade(dificuldade);
         ativa.setInicio(Instant.now());
@@ -72,18 +64,47 @@ public class ExpedicaoService {
         return ativaRepo.save(ativa);
     }
 
-    public boolean coletarRecompensa(Long jogadorId, Long ativaId) {
+    public boolean coletarRecompensa(Long ativaId) {
         ExpedicaoAtiva ativa = ativaRepo.findById(ativaId)
                 .orElseThrow(() -> new RuntimeException("Expedição ativa não encontrada"));
 
-        if (Instant.now().isBefore(ativa.getFim())) return false;
+        // ⏱️ Verifica se a expedição terminou
+        if (Instant.now().isBefore(ativa.getFim())) {
+            throw new RuntimeException("A expedição ainda não foi concluída.");
+        }
 
+        // 🚫 Verifica se já foi coletada
+        if (ativa.isConcluida()) {
+            throw new RuntimeException("A recompensa desta expedição já foi coletada.");
+        }
+
+        // 🏁 Marca como concluída
         ativa.setConcluida(true);
         ativaRepo.save(ativa);
 
-        Jogador jogador = ativa.getJogador();
-//        jogador.adicionarItem(ativa.getExpedicao().getItemRecompensa());
-        jogadorRepository.save(jogador);
+        // 🔹 Recupera o Digimon participante
+        Digimon digimon = ativa.getDigimon();
+
+        // 🔹 Pega a recompensa configurada na expedição
+        Item itemRecompensa = ativa.getExpedicao().getItemRecompensa();
+
+        if (itemRecompensa == null) {
+            throw new RuntimeException("Esta expedição não possui item de recompensa configurado.");
+        }
+
+        // 🔹 Adiciona o item ao inventário do Digimon
+        ItemInventario inventario = itemInventarioRepository
+                .findByDigimonIdAndItemId(digimon.getId(), itemRecompensa.getId())
+                .orElseGet(() -> {
+                    ItemInventario novo = new ItemInventario();
+                    novo.setDigimon(digimon);
+                    novo.setItem(itemRecompensa);
+                    novo.setQuantidade(0);
+                    return novo;
+                });
+
+        inventario.setQuantidade(inventario.getQuantidade() + 1);
+        itemInventarioRepository.save(inventario);
 
         return true;
     }

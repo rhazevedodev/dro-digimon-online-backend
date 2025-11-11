@@ -1,7 +1,5 @@
 package br.com.digimon.core.expedicao.web;
 
-import br.com.digimon.core.expedicao.domain.Expedicao;
-import br.com.digimon.core.expedicao.domain.ExpedicaoAtiva;
 import br.com.digimon.core.expedicao.dto.ExpedicaoAtivaDTO;
 import br.com.digimon.core.expedicao.dto.ExpedicaoDTO;
 import br.com.digimon.core.expedicao.enumerator.DificuldadeExpedicao;
@@ -43,19 +41,17 @@ public class ExpedicaoController {
     }
 
     @PostMapping("/coletar/{ativaId}")
-    public ResponseEntity<String> coletar(
-            @PathVariable Long ativaId,
-            @RequestParam Long jogadorId
-    ) {
-        log.info("Coletando recompensa da expedição ativa ID: {} para o jogador ID: {}", ativaId, jogadorId);
-        boolean sucesso = service.coletarRecompensa(jogadorId, ativaId);
-        return sucesso ? ResponseEntity.ok("Recompensa coletada!")
+    public ResponseEntity<String> coletar(@PathVariable Long ativaId) {
+        log.info("Coletando recompensa da expedição ativa ID: {}", ativaId);
+        boolean sucesso = service.coletarRecompensa(ativaId);
+        return sucesso
+                ? ResponseEntity.ok("Recompensa coletada com sucesso!")
                 : ResponseEntity.badRequest().body("Expedição ainda não concluída!");
     }
 
     @GetMapping("/ativas")
-    public ResponseEntity<List<ExpedicaoAtivaDTO>> listarAtivas(@RequestParam Long jogadorId) {
-        log.info("Listando expedições ativas para o jogador ID: {}", jogadorId);
-        return ResponseEntity.ok(expedicaoAtivaService.listarPorJogador(jogadorId));
+    public ResponseEntity<List<ExpedicaoAtivaDTO>> listarAtivas(@RequestParam Long digimonId) {
+        log.info("Listando expedições ativas para o jogador ID: {}", digimonId);
+        return ResponseEntity.ok(expedicaoAtivaService.listarPorDigimon(digimonId));
     }
 }

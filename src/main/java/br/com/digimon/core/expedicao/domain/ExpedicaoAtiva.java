@@ -17,11 +17,11 @@ public class ExpedicaoAtiva {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "jogador_id")
-    private Jogador jogador;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "digimon_id")
+    private Digimon digimon;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "expedicao_id")
     private Expedicao expedicao;
 
@@ -29,10 +29,7 @@ public class ExpedicaoAtiva {
     private DificuldadeExpedicao dificuldade;
 
     private boolean concluida = false;
+
     private Instant inicio;
     private Instant fim;
-
-    @OneToOne
-    @JoinColumn(name = "digimon_enviado_id")
-    private Digimon digimonEnviado;
 }

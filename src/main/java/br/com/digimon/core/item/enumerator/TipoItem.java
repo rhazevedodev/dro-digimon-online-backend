@@ -6,5 +6,7 @@ public enum TipoItem {
     EQUIPAMENTO,
     MATERIAL,
     ITEM_DE_EVOLUCAO,
-    ITEM_DE_EVENTO
+    ITEM_DE_EVENTO,
+    COMBATE,
+    DIVERSOS
 }

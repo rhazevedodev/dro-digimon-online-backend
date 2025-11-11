@@ -2,13 +2,16 @@ package br.com.digimon.core.expedicao.mapper;
 
 import br.com.digimon.core.digimon.dto.DigimonResumoDTO;
 import br.com.digimon.core.expedicao.domain.ExpedicaoAtiva;
-import br.com.digimon.core.expedicao.dto.*;
+import br.com.digimon.core.expedicao.dto.ExpedicaoAtivaDTO;
+import br.com.digimon.core.expedicao.dto.ExpedicaoResumoDTO;
 
 import java.time.Duration;
 
 public class ExpedicaoAtivaMapper {
 
     public static ExpedicaoAtivaDTO toDTO(ExpedicaoAtiva ativa) {
+        if (ativa == null) return null;
+
         return ExpedicaoAtivaDTO.builder()
                 .id(ativa.getId())
                 .expedicao(
@@ -20,15 +23,19 @@ public class ExpedicaoAtivaMapper {
                 .dificuldade(ativa.getDificuldade().name())
                 .digimon(
                         DigimonResumoDTO.builder()
-                                .id(ativa.getDigimonEnviado().getId())
-                                .nome(ativa.getDigimonEnviado().getNome())
-                                .estagio(ativa.getDigimonEnviado().getEstagio())
-                                .nivel(ativa.getDigimonEnviado().getNivel())
+                                .id(ativa.getDigimon().getId())
+                                .nome(ativa.getDigimon().getNome())
+                                .estagio(ativa.getDigimon().getEstagio())
+                                .nivel(ativa.getDigimon().getNivel())
                                 .build()
                 )
-                .inicio(ativa.getInicio().toString())
-                .fim(ativa.getFim().toString())
-                .duracaoHoras(Duration.between(ativa.getInicio(), ativa.getFim()).toHours())
+                .inicio(ativa.getInicio() != null ? ativa.getInicio().toString() : null)
+                .fim(ativa.getFim() != null ? ativa.getFim().toString() : null)
+                .duracaoHoras(
+                        (ativa.getInicio() != null && ativa.getFim() != null)
+                                ? Duration.between(ativa.getInicio(), ativa.getFim()).toHours()
+                                : 0
+                )
                 .build();
     }
 }

@@ -1,6 +1,7 @@
 package br.com.digimon.security;
 
 import br.com.digimon.security.JwtAuthenticationFilter;
+import br.com.digimon.shared.CustomAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,7 +32,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   CustomAuthenticationEntryPoint customEntryPoint) throws Exception {
         http
                 // 🔹 Habilita o CORS e usa o bean customizado abaixo
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -45,11 +47,16 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(customEntryPoint)
+                )
+
                 // 🔹 define política de sessão como stateless (não guarda sessão)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 // 🔹 adiciona filtro JWT antes do UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
 
         return http.build();
     }
