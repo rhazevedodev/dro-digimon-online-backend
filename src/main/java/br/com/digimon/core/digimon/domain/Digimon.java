@@ -20,77 +20,37 @@ public class Digimon {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String nome;
-
-    private String estagio;
-
-    private int nivel = 1;
-    private int experiencia = 0;
-    private int energia = 0;
-    private int powerTotal = 0;
-    private int bits = 0;
-
-    @Column(nullable = false)
-    private boolean ativo = false;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "jogador_id", nullable = false)
     private Jogador jogador;
+
+    @Column(nullable = false)
+    private String nome;
+    private int nivel;
+    private int experiencia;
+    private int energia;
+    private int bits;
+    private int powerTotal;
+    @Enumerated(EnumType.STRING)
+    private DigimonPersonality personality;
+    private String estagio;
+    @Column(nullable = false)
+    private boolean ativo;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "species_id")
     private DigimonSpecies species;
 
-    @Enumerated(EnumType.STRING)
-    private DigimonPersonality personality;
+    @OneToOne(mappedBy = "digimon", cascade = CascadeType.ALL, orphanRemoval = true)
+    private DigimonAtributosBasicos atributosBasicos;
 
-    // Atributos dinâmicos
-    private int hp;
-    private int atk;
-    private int def;
-    private int int_;
-    private int spd;
+    @OneToOne(mappedBy = "digimon", cascade = CascadeType.ALL, orphanRemoval = true)
+    private DigimonAtributosExtras atributosExtras;
 
-    private double critRate;
-    private double critDamage;
-    private double accuracy;
-    private double evade;
-    private double bond;
+    @OneToOne(mappedBy = "digimon", cascade = CascadeType.ALL, orphanRemoval = true)
+    private DigimonIV iv;
 
-    // 🔹 IVs (1–100)
-    private int ivHp;
-    private int ivAtk;
-    private int ivDef;
-    private int ivInt;
-    private int ivSpd;
-
-    // 🔹 IV total (média dos cinco)
-    private double ivTotal;
-
-    // 🔹 Gera IVs aleatórios ao nascer
-    public void gerarIVs() {
-        Random r = new Random();
-        ivHp = r.nextInt(100) + 1;  // 1–100
-        ivAtk = r.nextInt(100) + 1;
-        ivDef = r.nextInt(100) + 1;
-        ivInt = r.nextInt(100) + 1;
-        ivSpd = r.nextInt(100) + 1;
-
-        // Calcula IV total como média
-        ivTotal = Math.round(((ivHp + ivAtk + ivDef + ivInt + ivSpd) / 5.0) * 100.0) / 100.0;
-    }
-
-    // 🔹 EVs (Effort Values)
-    private int evHp;
-    private int evAtk;
-    private int evDef;
-    private int evInt;
-    private int evSpd;
-
-    @Transient
-    public int getEvTotal() {
-        return evHp + evAtk + evDef + evInt + evSpd;
-    }
+    @OneToOne(mappedBy = "digimon", cascade = CascadeType.ALL, orphanRemoval = true)
+    private DigimonEV ev;
 
 }

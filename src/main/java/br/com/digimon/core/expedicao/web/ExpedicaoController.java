@@ -2,6 +2,7 @@ package br.com.digimon.core.expedicao.web;
 
 import br.com.digimon.core.expedicao.dto.ExpedicaoAtivaDTO;
 import br.com.digimon.core.expedicao.dto.ExpedicaoDTO;
+import br.com.digimon.core.expedicao.dto.ExpedicaoRecompensaDTO;
 import br.com.digimon.core.expedicao.enumerator.DificuldadeExpedicao;
 import br.com.digimon.core.expedicao.mapper.ExpedicaoAtivaMapper;
 import br.com.digimon.core.expedicao.service.ExpedicaoAtivaService;
@@ -41,12 +42,10 @@ public class ExpedicaoController {
     }
 
     @PostMapping("/coletar/{ativaId}")
-    public ResponseEntity<String> coletar(@PathVariable Long ativaId) {
+    public ResponseEntity<ExpedicaoRecompensaDTO> coletar(@PathVariable Long ativaId) {
         log.info("Coletando recompensa da expedição ativa ID: {}", ativaId);
-        boolean sucesso = service.coletarRecompensa(ativaId);
-        return sucesso
-                ? ResponseEntity.ok("Recompensa coletada com sucesso!")
-                : ResponseEntity.badRequest().body("Expedição ainda não concluída!");
+        ExpedicaoRecompensaDTO recompensa = service.coletarRecompensa(ativaId);
+        return ResponseEntity.ok(recompensa);
     }
 
     @GetMapping("/ativas")

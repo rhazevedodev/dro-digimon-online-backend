@@ -28,8 +28,4 @@ public class Expedicao {
     @ManyToOne
     @JoinColumn(name = "item_requerido_id")
     private Item itemRequerido;
-
-    @ManyToOne
-    @JoinColumn(name = "item_recompensa_id")
-    private Item itemRecompensa;
 }

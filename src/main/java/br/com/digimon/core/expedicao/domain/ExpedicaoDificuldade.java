@@ -1,6 +1,7 @@
 package br.com.digimon.core.expedicao.domain;
 
 import br.com.digimon.core.expedicao.enumerator.DificuldadeExpedicao;
+import br.com.digimon.core.item.domain.Item;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -19,17 +20,21 @@ public class ExpedicaoDificuldade {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "expedicao_id")
-    @JsonBackReference("expedicao-dificuldades")
+    @JoinColumn(name = "expedicao_id", nullable = false)
     private Expedicao expedicao;
 
     @Enumerated(EnumType.STRING)
-    private DificuldadeExpedicao dificuldade; // FÁCIL, MÉDIA, DIFÍCIL, EXTREMA
+    private DificuldadeExpedicao dificuldade; // FACIL, MEDIA, DIFICIL, EXTREMA
 
     private int poderMinimo;
     private int duracaoHoras;
 
-    @OneToMany(mappedBy = "dificuldade", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonManagedReference("dificuldade-recompensas")
-    private List<ExpedicaoItemRecompensa> recompensas;
+    private int expBase;  // 💎 novo campo
+    private int bitsBase; // 💰 novo campo
+
+    @ManyToOne
+    @JoinColumn(name = "item_recompensa_id")
+    private Item itemRecompensa;
+
+    private int quantidadeItemRecompensa = 1;
 }

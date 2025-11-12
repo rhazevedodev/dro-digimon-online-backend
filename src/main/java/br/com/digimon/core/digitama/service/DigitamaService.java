@@ -1,7 +1,6 @@
 package br.com.digimon.core.digitama.service;
 
-import br.com.digimon.core.digimon.domain.Digimon;
-import br.com.digimon.core.digimon.domain.DigimonSpecies;
+import br.com.digimon.core.digimon.domain.*;
 import br.com.digimon.core.digimon.enumerator.DigimonPersonality;
 import br.com.digimon.core.digimon.repository.DigimonRepository;
 import br.com.digimon.core.digimon.service.DigimonSpeciesService;
@@ -71,16 +70,31 @@ public class DigitamaService {
         novo.setJogador(jogador);
         novo.setSpecies(especie);
 
+        DigimonAtributosBasicos atributosBasicos = new DigimonAtributosBasicos();
+        atributosBasicos.setDigimon(novo);
         // Atributos iniciais herdados da espécie
-        novo.setHp(especie.getBaseHp());
-        novo.setAtk(especie.getBaseAtk());
-        novo.setDef(especie.getBaseDef());
-        novo.setInt_(especie.getBaseInt());
-        novo.setSpd(especie.getBaseSpd());
+        atributosBasicos.setHp(especie.getBaseHp());
+        atributosBasicos.setAtk(especie.getBaseAtk());
+        atributosBasicos.setDef(especie.getBaseDef());
+        atributosBasicos.setIntValue(especie.getBaseInt());
+        atributosBasicos.setSpd(especie.getBaseSpd());
+        novo.setAtributosBasicos(atributosBasicos);
+
         novo.setEnergia(50); // pode ser fixo para começar
 
+        DigimonAtributosExtras atributosExtras = new DigimonAtributosExtras();
+        atributosExtras.setDigimon(novo);
+        atributosExtras.setCritRate(0);
+        atributosExtras.setCritDamage(0);
+        atributosExtras.setAccuracy(0);
+        atributosExtras.setEvade(0);
+        atributosExtras.setBond(0);
+        novo.setAtributosExtras(atributosExtras);
+
         // 🔹 Gera IVs aleatórios
-        novo.gerarIVs();
+        DigimonIV novoIV = new DigimonIV();
+        novoIV.setDigimon(novo);
+        novoIV.gerarIVs();
 
         // 🔹 Define personalidade
         novo.setPersonality(DigimonPersonality.values()[new Random().nextInt(DigimonPersonality.values().length)]);
@@ -104,12 +118,12 @@ public class DigitamaService {
                 .elemento(especie.getElemento().toString())
                 .personalidade(novo.getPersonality().toString())
                 .ivs(new java.util.HashMap<>() {{
-                    put("hp", novo.getIvHp());
-                    put("atk", novo.getIvAtk());
-                    put("def", novo.getIvDef());
-                    put("int", novo.getIvInt());
-                    put("spd", novo.getIvSpd());
-                    put("total", novo.getIvTotal());
+                    put("hp", novoIV.getIvHp());
+                    put("atk", novoIV.getIvAtk());
+                    put("def", novoIV.getIvDef());
+                    put("int", novoIV.getIvInt());
+                    put("spd", novoIV.getIvSpd());
+                    put("total", novoIV.getIvTotal());
                 }})
                 .build();
     }

@@ -11,5 +11,4 @@ public class ExpedicaoDificuldadeDTO {
     private String dificuldade;
     private int poderMinimo;
     private int duracaoHoras;
-    private List<ExpedicaoItemRecompensaDTO> recompensas;
 }

@@ -6,9 +6,11 @@ import br.com.digimon.core.expedicao.domain.Expedicao;
 import br.com.digimon.core.expedicao.domain.ExpedicaoAtiva;
 import br.com.digimon.core.expedicao.domain.ExpedicaoDificuldade;
 import br.com.digimon.core.expedicao.dto.ExpedicaoDTO;
+import br.com.digimon.core.expedicao.dto.ExpedicaoRecompensaDTO;
 import br.com.digimon.core.expedicao.enumerator.DificuldadeExpedicao;
 import br.com.digimon.core.expedicao.mapper.ExpedicaoMapper;
 import br.com.digimon.core.expedicao.repo.ExpedicaoAtivaRepository;
+import br.com.digimon.core.expedicao.repo.ExpedicaoDificuldadeRepository;
 import br.com.digimon.core.expedicao.repo.ExpedicaoRepository;
 import br.com.digimon.core.item.domain.Item;
 import br.com.digimon.core.item.domain.ItemInventario;
@@ -16,6 +18,7 @@ import br.com.digimon.core.item.repo.ItemInventarioRepository;
 import br.com.digimon.core.jogador.domain.Jogador;
 import br.com.digimon.core.jogador.repo.JogadorRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -24,6 +27,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ExpedicaoService {
 
     private final ExpedicaoRepository expedicaoRepo;
@@ -31,6 +35,7 @@ public class ExpedicaoService {
     private final JogadorRepository jogadorRepository;
     private final DigimonRepository digimonRepository;
     private final ItemInventarioRepository itemInventarioRepository;
+    private final ExpedicaoDificuldadeRepository expedicaoDificuldadeRepository;
 
     public List<ExpedicaoDTO> listarExpedicoesDisponiveis(Long jogadorId) {
         var jogador = jogadorRepository.findById(jogadorId)
@@ -64,49 +69,66 @@ public class ExpedicaoService {
         return ativaRepo.save(ativa);
     }
 
-    public boolean coletarRecompensa(Long ativaId) {
+    public ExpedicaoRecompensaDTO coletarRecompensa(Long ativaId) {
         ExpedicaoAtiva ativa = ativaRepo.findById(ativaId)
                 .orElseThrow(() -> new RuntimeException("Expedição ativa não encontrada"));
 
-        // ⏱️ Verifica se a expedição terminou
         if (Instant.now().isBefore(ativa.getFim())) {
             throw new RuntimeException("A expedição ainda não foi concluída.");
         }
 
-        // 🚫 Verifica se já foi coletada
         if (ativa.isConcluida()) {
             throw new RuntimeException("A recompensa desta expedição já foi coletada.");
         }
 
-        // 🏁 Marca como concluída
         ativa.setConcluida(true);
         ativaRepo.save(ativa);
 
-        // 🔹 Recupera o Digimon participante
         Digimon digimon = ativa.getDigimon();
 
-        // 🔹 Pega a recompensa configurada na expedição
-        Item itemRecompensa = ativa.getExpedicao().getItemRecompensa();
+        // Busca os dados da dificuldade correspondente
+        ExpedicaoDificuldade dificuldade = expedicaoDificuldadeRepository
+                .findByExpedicaoIdAndDificuldade(
+                        ativa.getExpedicao().getId(),
+                        ativa.getDificuldade()
+                );
 
-        if (itemRecompensa == null) {
-            throw new RuntimeException("Esta expedição não possui item de recompensa configurado.");
+        if (dificuldade == null) {
+            throw new RuntimeException("Dificuldade da expedição não encontrada.");
         }
 
-        // 🔹 Adiciona o item ao inventário do Digimon
-        ItemInventario inventario = itemInventarioRepository
-                .findByDigimonIdAndItemId(digimon.getId(), itemRecompensa.getId())
-                .orElseGet(() -> {
-                    ItemInventario novo = new ItemInventario();
-                    novo.setDigimon(digimon);
-                    novo.setItem(itemRecompensa);
-                    novo.setQuantidade(0);
-                    return novo;
-                });
+        // 🎯 Calcula recompensas
+        int expGanha = dificuldade.getExpBase();
+        int bitsGanho = dificuldade.getBitsBase();
 
-        inventario.setQuantidade(inventario.getQuantidade() + 1);
-        itemInventarioRepository.save(inventario);
+        digimon.setExperiencia(digimon.getExperiencia() + expGanha);
+        digimon.setBits(digimon.getBits() + bitsGanho);
+        digimonRepository.save(digimon);
 
-        return true;
+        // 🎁 Item recompensa
+        String nomeItem = null;
+        int qtdItem = 0;
+        if (dificuldade.getItemRecompensa() != null) {
+            nomeItem = dificuldade.getItemRecompensa().getNome();
+            qtdItem = dificuldade.getQuantidadeItemRecompensa();
+//            adicionarItemAoInventario(digimon, dificuldade.getItemRecompensa(), qtdItem);
+        }
+
+        log.info("Recompensa coletada: {} EXP, {} Bits, {}x {}",
+                dificuldade.getExpBase(),
+                dificuldade.getBitsBase(),
+                dificuldade.getQuantidadeItemRecompensa(),
+                dificuldade.getItemRecompensa().getNome());
+
+        // 🧾 Monta DTO de retorno
+        return ExpedicaoRecompensaDTO.builder()
+                .nomeExpedicao(ativa.getExpedicao().getNome())
+                .dificuldade(dificuldade.getDificuldade().name())
+                .experienciaGanha(expGanha)
+                .bitsGanho(bitsGanho)
+                .nomeItemRecompensa(nomeItem)
+                .quantidadeItemRecompensa(qtdItem)
+                .build();
     }
 
     private boolean jogadorPossuiItem(Jogador jogador, Item item) {
