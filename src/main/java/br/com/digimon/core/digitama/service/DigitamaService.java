@@ -8,6 +8,7 @@ import br.com.digimon.core.digitama.config.DigitamaProperties;
 import br.com.digimon.core.digitama.domain.Digitama;
 import br.com.digimon.core.digitama.dto.ChocarDigitamaRequestDTO;
 import br.com.digimon.core.digitama.dto.ChocarDigitamaResponseDTO;
+import br.com.digimon.core.estado.domain.EstadoJogo;
 import br.com.digimon.core.estado.service.EstadoJogoService;
 import br.com.digimon.core.jogador.domain.Jogador;
 import br.com.digimon.core.jogador.repo.JogadorRepository;
@@ -50,6 +51,19 @@ public class DigitamaService {
         // Busca jogador logado
         Jogador jogador = jogadorRepository.findByUsuarioUsername(username)
                 .orElseThrow(() -> new RuntimeException("Jogador não encontrado"));
+
+        // 🔹 Busca estado atual do jogo
+        EstadoJogo estado = estadoJogoService.getOuCriarEstado(jogador);
+
+        // 🔒 Valida se o jogador tem uma Digitama selecionada
+        if (!estado.getDigitamaSelecionada()) {
+            throw new IllegalStateException("Nenhuma Digitama foi selecionada para chocar.");
+        }
+
+        // 🔒 Impede chocar mais de uma vez
+        if (estado.getDigitamaChocada()) {
+            throw new IllegalStateException("O jogador já possui uma Digitama chocada.");
+        }
 
         // Busca digitama escolhida
         var digitama = properties.getList().stream()

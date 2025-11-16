@@ -23,6 +23,10 @@ public class EstadoJogoService {
 
     public void marcarDigitamaSelecionada(Jogador jogador, Long digitamaId) {
         EstadoJogo estado = getOuCriarEstado(jogador);
+
+        if (estado.getDigitamaSelecionada()) {
+            throw new IllegalStateException("O jogador já possui uma Digitama selecionada.");
+        }
         estado.setDigitamaSelecionada(true);
         estado.setDigitamaIdSelecionada(digitamaId);
         estado.setDigitamaChocada(false);

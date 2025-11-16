@@ -5,11 +5,15 @@ import br.com.digimon.core.jogador.dto.CriarJogadorDTO;
 import br.com.digimon.core.jogador.service.JogadorService;
 import br.com.digimon.core.usuario.domain.Usuario;
 import br.com.digimon.core.usuario.dto.CriarUsuarioDTO;
+import br.com.digimon.core.usuario.dto.ListaUsuarioDTO;
 import br.com.digimon.core.usuario.repo.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,8 +44,22 @@ public class UsuarioService {
         return usuario;
     }
 
+    public boolean existsByUsername(String username) {
+        return usuarioRepository.existsByUsername(username);
+    }
+
     public Usuario buscarPorUsername(String username) {
         return usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado: " + username));
+    }
+
+    public List<ListaUsuarioDTO> listarUsuarios() {
+        return usuarioRepository.findAll().stream()
+                .map(usuario -> new ListaUsuarioDTO(usuario.getId(), usuario.getUsername(), usuario.getEmail()))
+                .collect(Collectors.toList());
+    }
+
+    public boolean existsByEmail(String email) {
+        return usuarioRepository.existsByEmail(email);
     }
 }

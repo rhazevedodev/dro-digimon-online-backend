@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()    // login, registro etc.
                         .requestMatchers("/digitamas/**").permitAll() // se quiser permitir a listagem de digitamas
                         .requestMatchers("/jogador/me").authenticated()
+                        .requestMatchers("/usuarios/**").permitAll() // só admin pode listar usuários
                         .anyRequest().authenticated()
                 )
 
