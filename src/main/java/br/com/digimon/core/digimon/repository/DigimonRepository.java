@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface DigimonRepository extends JpaRepository<Digimon, Long> {
     @Override
     List<Digimon> findAll();
+
+    List<Digimon> findByJogadorId(Long id);
 }

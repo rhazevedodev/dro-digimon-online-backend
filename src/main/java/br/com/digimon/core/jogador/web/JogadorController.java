@@ -1,8 +1,11 @@
 package br.com.digimon.core.jogador.web;
 
+import br.com.digimon.core.digimon.repository.DigimonRepository;
 import br.com.digimon.core.jogador.domain.Jogador;
 import br.com.digimon.core.jogador.dto.CriarJogadorDTO;
 import br.com.digimon.core.jogador.dto.JogadorResponseDTO;
+import br.com.digimon.core.jogador.dto.JornadaResponseDTO;
+import br.com.digimon.core.jogador.repo.JogadorRepository;
 import br.com.digimon.core.jogador.service.JogadorService;
 import br.com.digimon.core.usuario.domain.Usuario;
 import lombok.RequiredArgsConstructor;
@@ -11,12 +14,17 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequestMapping("/jogador")
 @RequiredArgsConstructor
 public class JogadorController {
 
     private final JogadorService jogadorService;
+    private final DigimonRepository digimonRepository;
+    private final JogadorRepository jogadorRepository;
 
     @PostMapping
     public ResponseEntity<Jogador> criar(@RequestBody CriarJogadorDTO dto) {
@@ -39,5 +47,12 @@ public class JogadorController {
 
         JogadorResponseDTO dto = jogadorService.getJogadorResponse(username);
         return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/jornada")
+    public ResponseEntity<JornadaResponseDTO> continuarJornada(Authentication auth) {
+        return ResponseEntity.ok(jogadorService.montarJornada(
+                jogadorService.buscarPorUsername(auth.getName())
+        ));
     }
 }
