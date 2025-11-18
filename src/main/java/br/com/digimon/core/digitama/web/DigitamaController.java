@@ -12,6 +12,7 @@ import br.com.digimon.core.jogador.service.JogadorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,24 +32,6 @@ public class DigitamaController {
     public ResponseEntity<List<Digitama>> listar() {
         return ResponseEntity.ok(digitamaService.listarDigitamas());
     }
-
-//    /**
-//     * Cria o primeiro Digimon do jogador com base no Digitama escolhido
-//     */
-//    @PostMapping("/escolher/{idDigitama}")
-//    public ResponseEntity<String> escolherDigitama(
-//            @PathVariable Long idDigitama,
-//            @RequestParam Long jogadorId
-//    ) {
-//        var digitama = digitamaService.buscarPorId(idDigitama);
-//
-//        // Aqui você pode randomizar um dos "possíveis"
-//        var nomeDigimon = digitama.possiveis().get((int) (Math.random() * digitama.possiveis().size()));
-//
-////        digimonService.criarPrimeiroDigimon(jogadorId, nomeDigimon);
-//
-//        return ResponseEntity.ok("Você escolheu o " + digitama.nome() + " e nasceu um " + nomeDigimon + "!");
-//    }
 
     @PostMapping("/selecionar")
     public ResponseEntity<DigitamaSelecaoResponseDTO> selecionarDigitama(
@@ -83,12 +66,18 @@ public class DigitamaController {
         return ResponseEntity.ok(resposta);
     }
 
-
     @PostMapping("/chocar")
     public ResponseEntity<ChocarDigitamaResponseDTO> chocarDigitama(
             @RequestBody ChocarDigitamaRequestDTO dto,
             Authentication auth) {
         ChocarDigitamaResponseDTO digimonChocado = digitamaService.chocarDigitama(dto, auth.getName());
         return ResponseEntity.ok(digimonChocado);
+    }
+
+    @PostMapping("/iniciar-selecao-slot")
+    public ResponseEntity<Void> iniciarSelecaoDigitamaSlot(Authentication auth) {
+        Jogador jogador = jogadorService.buscarPorUsername(auth.getName());
+        estadoJogoService.iniciarSelecaoDigitamaParaSlot(jogador);
+        return ResponseEntity.ok().build();
     }
 }

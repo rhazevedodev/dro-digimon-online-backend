@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +46,19 @@ public class JogadorService {
                 .orElseThrow(() -> new RuntimeException("Jogador não encontrado para o usuário: " + username));
     }
 
+    // 🔹 Requisitos de desbloqueio por slot (3 → 8)
+    private static final Map<Integer, Integer> SLOT_UNLOCK_REQUIREMENTS = Map.of(
+            3, 10000,
+            4, 50000,
+            5, 250000,
+            6, 1000000,
+            7, 5000000,
+            8, 99999999
+    );
+
+    // ========================================================
+    // 🔥 MONTAR JORNADA COMPLETA (8 SLOTS)
+    // ========================================================
     public JornadaResponseDTO montarJornada(Jogador jogador) {
 
         List<Digimon> digimons = digimonRepository.findByJogadorId(jogador.getId());
@@ -53,61 +67,68 @@ public class JogadorService {
 
         List<JornadaResponseDTO.SlotDTO> slots = new ArrayList<>();
 
-        // ------------------------
-        // SLOT 1
-        // ------------------------
+        // ========================================================
+        // SLOT 1 — sempre primeiro Digimon
+        // ========================================================
         if (qtd >= 1) {
             slots.add(slotOcupado(digimons.get(0)));
         } else {
             slots.add(slotBloqueado());
         }
 
-        // ------------------------
-        // SLOT 2
-        // ------------------------
+        // ========================================================
+        // SLOT 2 — segundo Digimon ou disponível
+        // ========================================================
         if (qtd >= 2) {
             slots.add(slotOcupado(digimons.get(1)));
         } else {
             slots.add(slotDisponivel());
         }
 
-        // ------------------------
-        // SLOTS 3 a 8
-        // ------------------------
-        boolean desbloquearAvancados = (pontos == 99_999_999);
+        // ========================================================
+        // SLOTS 3 a 8 — desbloqueios individuais + preenchimento
+        // ========================================================
+        for (int slotIndex = 3; slotIndex <= 8; slotIndex++) {
 
-        for (int i = 2; i < 8; i++) {
+            int digimonIndex = slotIndex - 1; // índice real da lista
 
-            // Se jogador desbloqueou e já existe digimon naquela posição
-            if (i < qtd) {
-                slots.add(slotOcupado(digimons.get(i)));
+            // Caso já existam digimons suficientes para ocupar esse slot
+            if (digimonIndex < qtd) {
+                slots.add(slotOcupado(digimons.get(digimonIndex)));
+                continue;
             }
 
-            // Se jogador desbloqueou mas não tem digimon naquele slot
-            else if (desbloquearAvancados) {
+            // Verifica desbloqueio individual
+            boolean desbloqueado = podeDesbloquearSlot(slotIndex, pontos);
+
+            if (desbloqueado) {
                 slots.add(slotDisponivel());
-            }
-
-            // Não desbloqueou → bloqueado
-            else {
+            } else {
                 slots.add(slotBloqueado());
             }
         }
 
-        return new JornadaResponseDTO(
-                pontos,
-                slots
-        );
+        return new JornadaResponseDTO(pontos, slots);
     }
 
-    private JornadaResponseDTO.SlotDTO slotOcupado(Digimon d) {
+    // ========================================================
+    // 🔹 Verifica desbloqueio individual do slot
+    // ========================================================
+    private boolean podeDesbloquearSlot(int slotNumero, int pontosDigitais) {
+        return pontosDigitais >= SLOT_UNLOCK_REQUIREMENTS.getOrDefault(slotNumero, Integer.MAX_VALUE);
+    }
+
+    // ========================================================
+    // 🔹 Helpers para criar SlotDTO
+    // ========================================================
+    private JornadaResponseDTO.SlotDTO slotOcupado(Digimon digimon) {
         return new JornadaResponseDTO.SlotDTO(
                 "ocupado",
                 new JornadaResponseDTO.DigimonDTO(
-                        d.getId(),
-                        d.getNome(),
-                        d.getNivel(),
-                        "/assets/digimons/" + d.getNome().toLowerCase() + ".png"
+                        digimon.getId(),
+                        digimon.getNome(),
+                        digimon.getNivel(),
+                        "/assets/digimons/" + digimon.getNome().toLowerCase() + ".png"
                 )
         );
     }
@@ -119,4 +140,5 @@ public class JogadorService {
     private JornadaResponseDTO.SlotDTO slotBloqueado() {
         return new JornadaResponseDTO.SlotDTO("bloqueado", null);
     }
+
 }

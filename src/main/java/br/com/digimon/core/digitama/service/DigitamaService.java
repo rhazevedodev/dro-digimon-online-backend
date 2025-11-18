@@ -122,6 +122,7 @@ public class DigitamaService {
         }
 
         estadoJogoService.marcarDigitamaChocada(jogador);
+        estadoJogoService.finalizarSelecaoDigitamaParaSlot(jogador);
 
         return ChocarDigitamaResponseDTO.builder()
                 .digimonId(especie.getId())

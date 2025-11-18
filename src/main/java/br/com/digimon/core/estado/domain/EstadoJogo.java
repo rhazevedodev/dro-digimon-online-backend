@@ -26,6 +26,9 @@ public class EstadoJogo {
     private Long digitamaIdSelecionada;
     private Boolean digitamaChocada = false;
 
+    // 🔹 Nova flag: seleção de Digitama para preencher um slot da jornada
+    private Boolean selecaoDigitamaParaSlot = false;
+
     @UpdateTimestamp
     private LocalDateTime ultimoUpdate;
 }
