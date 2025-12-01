@@ -34,6 +34,8 @@ public class JogadorResponseDTO {
                                 .id(d.getId())
                                 .nome(d.getNome())
                                 .ativo(d.isAtivo())
+                                .estagio(d.getEstagio())
+                                .nivel(d.getNivel())
                                 .build())
                         .collect(Collectors.toList())
                         : List.of())
