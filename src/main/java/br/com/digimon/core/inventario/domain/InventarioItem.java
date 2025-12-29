@@ -1,32 +1,28 @@
 package br.com.digimon.core.inventario.domain;
 
+import br.com.digimon.core.digimon.domain.Digimon;
 import br.com.digimon.core.item.domain.Item;
-import br.com.digimon.core.jogador.domain.Jogador;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
-@Table(name = "inventario_item")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Table(name = "item_inventario")
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor @Builder
 public class InventarioItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "jogador_id")
-    private Jogador jogador;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "digimon_id", nullable = false)
+    private Digimon digimon;
 
-    @ManyToOne
-    @JoinColumn(name = "item_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
-    private int quantidade = 0;
+    @Column(nullable = false)
+    private int quantidade;
 }

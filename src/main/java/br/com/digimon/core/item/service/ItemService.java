@@ -3,7 +3,7 @@ package br.com.digimon.core.item.service;
 import br.com.digimon.core.digimon.domain.Digimon;
 import br.com.digimon.core.digimon.repository.DigimonRepository;
 import br.com.digimon.core.item.domain.Item;
-import br.com.digimon.core.item.domain.ItemInventario;
+import br.com.digimon.core.inventario.domain.InventarioItem;
 import br.com.digimon.core.item.domain.ItemLootPool;
 import br.com.digimon.core.item.dto.ItemEnxutoDTO;
 import br.com.digimon.core.item.dto.ItemRecompensaSimplesDTO;
@@ -73,11 +73,11 @@ public class ItemService {
         Item itemConsumivel = itemRepository.findById(itemConsumivelId)
                 .orElseThrow(() -> new RuntimeException("Item não encontrado"));
 
-        ItemInventario itemInventario = itemInventarioRepository
+        InventarioItem inventarioItem = itemInventarioRepository
                 .findByDigimonIdAndItemId(digimonId, itemConsumivelId)
                 .orElseThrow(() -> new RuntimeException("O Digimon não possui este item para abrir."));
 
-        if (itemInventario.getQuantidade() <= 0) {
+        if (inventarioItem.getQuantidade() <= 0) {
             throw new RuntimeException("O Digimon não possui este item para abrir.");
         }
 
@@ -94,10 +94,10 @@ public class ItemService {
                         .nextInt(entry.getQuantidadeMinima(), entry.getQuantidadeMaxima() + 1);
 
                 // Atualiza ou cria o item no inventário
-                ItemInventario inventario = itemInventarioRepository
+                InventarioItem inventario = itemInventarioRepository
                         .findByDigimonIdAndItemId(digimonId, entry.getItemRecompensa().getId())
                         .orElseGet(() -> {
-                            ItemInventario novo = new ItemInventario();
+                            InventarioItem novo = new InventarioItem();
                             novo.setDigimon(digimon);
                             novo.setItem(entry.getItemRecompensa());
                             novo.setQuantidade(0);
@@ -115,11 +115,11 @@ public class ItemService {
         }
 
         // Consome o baú (1 unidade)
-        itemInventario.setQuantidade(itemInventario.getQuantidade() - 1);
-        if (itemInventario.getQuantidade() <= 0) {
-            itemInventarioRepository.delete(itemInventario);
+        inventarioItem.setQuantidade(inventarioItem.getQuantidade() - 1);
+        if (inventarioItem.getQuantidade() <= 0) {
+            itemInventarioRepository.delete(inventarioItem);
         } else {
-            itemInventarioRepository.save(itemInventario);
+            itemInventarioRepository.save(inventarioItem);
         }
 
         return recompensas;

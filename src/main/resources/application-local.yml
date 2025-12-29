@@ -7,7 +7,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate # importante: não criar nada, só validar
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true

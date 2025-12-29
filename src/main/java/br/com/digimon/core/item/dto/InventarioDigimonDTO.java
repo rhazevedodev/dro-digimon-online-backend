@@ -1,6 +1,6 @@
 package br.com.digimon.core.item.dto;
 
-import br.com.digimon.core.item.domain.ItemInventario;
+import br.com.digimon.core.inventario.domain.InventarioItem;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -23,7 +23,7 @@ public class InventarioDigimonDTO {
         private int quantidade;
         private String imagem;
 
-        public static ItemInventarioDTO fromEntity(ItemInventario ii) {
+        public static ItemInventarioDTO fromEntity(InventarioItem ii) {
             return ItemInventarioDTO.builder()
                     .idItem(ii.getItem().getId())
                     .nome(ii.getItem().getNome())

@@ -1,7 +1,6 @@
 package br.com.digimon.core.item.service;
 
-import br.com.digimon.core.item.domain.Item;
-import br.com.digimon.core.item.domain.ItemInventario;
+import br.com.digimon.core.inventario.domain.InventarioItem;
 import br.com.digimon.core.item.dto.AdicionarItemInventarioDTO;
 import br.com.digimon.core.item.dto.InventarioDigimonDTO;
 import br.com.digimon.core.item.repo.ItemInventarioRepository;
@@ -45,7 +44,7 @@ public class ItemInventarioService {
             inv.setQuantidade(inv.getQuantidade() + dto.getQuantidade());
             itemInventarioRepository.save(inv);
         } else {
-            var novo = ItemInventario.builder()
+            var novo = InventarioItem.builder()
                     .digimon(digimon)
                     .item(item)
                     .quantidade(dto.getQuantidade())

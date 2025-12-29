@@ -13,9 +13,7 @@ import br.com.digimon.core.expedicao.repo.ExpedicaoAtivaRepository;
 import br.com.digimon.core.expedicao.repo.ExpedicaoDificuldadeRepository;
 import br.com.digimon.core.expedicao.repo.ExpedicaoRepository;
 import br.com.digimon.core.item.domain.Item;
-import br.com.digimon.core.item.domain.ItemInventario;
 import br.com.digimon.core.item.repo.ItemInventarioRepository;
-import br.com.digimon.core.jogador.domain.Jogador;
 import br.com.digimon.core.jogador.repo.JogadorRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,12 +35,12 @@ public class ExpedicaoService {
     private final ItemInventarioRepository itemInventarioRepository;
     private final ExpedicaoDificuldadeRepository expedicaoDificuldadeRepository;
 
-    public List<ExpedicaoDTO> listarExpedicoesDisponiveis(Long jogadorId) {
-        var jogador = jogadorRepository.findById(jogadorId)
-                .orElseThrow(() -> new RuntimeException("Jogador não encontrado"));
+    public List<ExpedicaoDTO> listarExpedicoesDisponiveis(Long digimonid) {
+        var digimon = digimonRepository.findById(digimonid)
+                .orElseThrow(() -> new RuntimeException("Digimon não encontrado"));
 
         var expedicoes = expedicaoRepo.findAll().stream()
-                .filter(exp -> exp.isDesbloqueadaPadrao() || jogadorPossuiItem(jogador, exp.getItemRequerido()))
+                .filter(exp -> exp.isDesbloqueadaPadrao() || digimonPossuiItem(digimon, exp.getItemRequerido()))
                 .map(ExpedicaoMapper::toDTO)
                 .toList();
 
@@ -131,9 +129,9 @@ public class ExpedicaoService {
                 .build();
     }
 
-    private boolean jogadorPossuiItem(Jogador jogador, Item item) {
-        return jogador.getInventario().stream()
-                .anyMatch(i -> i.getItem().equals(item));
+    private boolean digimonPossuiItem(Digimon digimon, Item item) {
+        if (digimon == null || digimon.getId() == null || item == null || item.getId() == null) return false;
+        return itemInventarioRepository.existsByDigimonIdAndItemId(digimon.getId(), item.getId());
     }
 
     private long getDuracao(Expedicao exp, DificuldadeExpedicao dificuldade) {

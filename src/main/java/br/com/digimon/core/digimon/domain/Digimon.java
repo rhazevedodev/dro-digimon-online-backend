@@ -1,11 +1,13 @@
 package br.com.digimon.core.digimon.domain;
 
 import br.com.digimon.core.digimon.enumerator.DigimonPersonality;
+import br.com.digimon.core.inventario.domain.InventarioItem;
 import br.com.digimon.core.jogador.domain.Jogador;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -52,5 +54,8 @@ public class Digimon {
 
     @OneToOne(mappedBy = "digimon", cascade = CascadeType.ALL, orphanRemoval = true)
     private DigimonEV ev;
+
+    @OneToMany(mappedBy = "digimon", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<InventarioItem> inventario = new ArrayList<>();
 
 }

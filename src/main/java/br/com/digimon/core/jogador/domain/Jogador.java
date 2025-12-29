@@ -2,7 +2,6 @@ package br.com.digimon.core.jogador.domain;
 
 import br.com.digimon.core.digimon.domain.Digimon;
 import br.com.digimon.core.estado.domain.EstadoJogo;
-import br.com.digimon.core.inventario.domain.InventarioItem;
 import br.com.digimon.core.usuario.domain.Usuario;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -42,8 +41,8 @@ public class Jogador {
     @OneToMany(mappedBy = "jogador", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Digimon> digimons = new ArrayList<>();
 
-    @OneToMany(mappedBy = "jogador", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<InventarioItem> inventario = new ArrayList<>();
+//    @OneToMany(mappedBy = "jogador", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<InventarioItem> inventario = new ArrayList<>();
 
     public Optional<Digimon> getDigimonParceiro() {
         return digimons.stream().filter(Digimon::isAtivo).findFirst();
