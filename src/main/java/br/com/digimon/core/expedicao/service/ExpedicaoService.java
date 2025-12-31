@@ -57,6 +57,13 @@ public class ExpedicaoService {
         Expedicao exp = expedicaoRepo.findById(expedicaoId)
                 .orElseThrow(() -> new RuntimeException("Expedição não encontrada"));
 
+        ExpedicaoAtiva expedicoesAtivas = ativaRepo
+                .findByDigimonIdAndExpedicaoIdAndDificuldadeAndConcluidaFalse(digimonId, expedicaoId, dificuldade);
+
+        if (expedicoesAtivas != null) {
+            throw new RuntimeException("O Digimon já possui uma expedição ativa nesta dificuldade para esta expedição.");
+        }
+
         ExpedicaoAtiva ativa = new ExpedicaoAtiva();
         ativa.setDigimon(digimon);
         ativa.setExpedicao(exp);
