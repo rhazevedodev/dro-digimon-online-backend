@@ -1,9 +1,8 @@
 package br.com.digimon.core.digimon.web;
 
-import br.com.digimon.core.digimon.domain.Digimon;
+
 import br.com.digimon.core.digimon.dto.ListarDigimonsDTO;
 import br.com.digimon.core.digimon.service.DigimonService;
-import br.com.digimon.core.digitama.domain.Digitama;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +18,7 @@ public class DigimonController {
 
     private final DigimonService digimonService;
 
+    /* Metodo utilizado na renderizacao da tela de selecao de digimon */
     @GetMapping
     public ResponseEntity<List<ListarDigimonsDTO>> listar() {
         return ResponseEntity.ok(digimonService.listarDigimons());
